@@ -73,7 +73,8 @@ vm=$1
 UUID=$(${_kubectl} get vmis ${vm} -n ${namespace} --no-headers -o custom-columns=METATADA:.metadata.uid) 
 POD=$(${_kubectl} get pods -n ${namespace} -l kubevirt.io/created-by=${UUID} --no-headers -o custom-columns=NAME:.metadata.name)
 _exec="${_kubectl} exec  ${POD} -n ${namespace} -c compute --"
-_virtctl="virtctl --namespace ${namespace}"
+_virtctl="${VIRTCTL_BINARY:-virtctl}"
+_virtctl="${_virtctl} --namespace ${namespace}"
 
 if [ "${action}" == "pause" ]; then
     ${_virtctl} pause vm ${vm}
