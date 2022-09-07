@@ -64,10 +64,15 @@ _virtctl="${VIRTCTL_BINARY:-virtctl}"
 _virtctl="${_virtctl} --namespace ${namespace}"
 TMP_DIR="/opt/kubevirt/external/${namespace}_${vm}/"
 
+log () {
+    msg=$1
+    echo "===== [Info]: $1"
+}
+
 expect_vm_paused () {
   vm_status=`${_kubectl} get vm ${vm} -n ${namespace} -o=custom-columns='STATUS:status.printableStatus' | tail -n1`
   if [ "${vm_status}" != "Paused" ]; then
-    echo "VM must be paused to perform this operation. VM ${vm} is in status ${vm_status}"
+    log "VM must be paused to perform this operation. VM ${vm} is in status ${vm_status}"
     exit
   fi
 }
@@ -82,14 +87,14 @@ elif [ "${action}" == "dump" ]; then
     if [ "${dump_mode}" == "memory" ]; then
         dump_name="${namespace}_${vm}-${timestamp}.memory.dump"
         ${_virsh} dump ${namespace}_${vm} ${TMP_DIR}/${dump_name} --memory-only --verbose
-        echo "Memory export is in progress..."
+        log "Memory export is in progress..."
         ${_kubectl} cp ${namespace}/${POD}:${TMP_DIR}/${dump_name} ${dump_name}
         ${_exec} rm -f ${TMP_DIR}/${dump_name}
     elif [ "${dump_mode}" == "disk" ]; then
-        echo "Disk export is in progress..."
+        log "Disk export is in progress..."
         disk_paths=( $(${_exec} virsh domblklist ${namespace}_${vm} | tail -n+3 | cut -d"/" -f2-) )
         disk_count=${#disk_paths[@]}
-        echo "Found ${disk_count} disks"
+        log "Found ${disk_count} disks"
 
         for (( i=0; i<${disk_count}; i++ ));
         do
@@ -97,14 +102,14 @@ elif [ "${action}" == "dump" ]; then
             disk_path="/${disk_paths[$i]}"
             disk_name="${disk_path%/}" # strip trailing slash (if any)
             disk_name="${namespace}_${vm}-${timestamp}-${human_idx}_${disk_name##*/}"
-            echo "Dumping disk #${human_idx}, named: ${disk_name}"
+            log "Dumping disk #${human_idx}, named: ${disk_name}"
 
             ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name}
 
-            echo "Disk ${disk_name} dumped sucessfully!"
+            log "Disk ${disk_name} dumped sucessfully!"
         done
 
-        echo "Dumped ${disk_count} disks sucessfully"
+        log "Dumped ${disk_count} disks sucessfully"
     fi
 elif [ "${action}" == "unpause" ]; then
     ${_exec} bash -c "rm -rf /opt/kubevirt/*"
