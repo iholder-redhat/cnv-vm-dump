@@ -86,7 +86,7 @@ elif [ "${action}" == "dump" ]; then
         if [ "${dump_mode}" == "memory" ]; then
             ${_virsh} dump ${namespace}_${vm} /opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.memory.dump --memory-only --verbose
             echo "Memory export is in progress..."
-            ${_exec} cat /opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.memory.dump > ${namespace}_${vm}-${timestamp}.memory.dump
+            ${_kubectl} cp ${namespace}/${POD}:/opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.memory.dump ${namespace}_${vm}-${timestamp}.memory.dump
         elif [ "${dump_mode}" == "core" ]; then
             ${_virsh} dump ${namespace}_${vm} /opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.core.dump --verbose
         elif [ "${dump_mode}" == "disk" ]; then
