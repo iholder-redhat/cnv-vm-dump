@@ -63,12 +63,21 @@ _virtctl="${VIRTCTL_BINARY:-virtctl}"
 _virtctl="${_virtctl} --namespace ${namespace}"
 TMP_DIR="/opt/kubevirt/external/${namespace}_${vm}/"
 
+expect_vm_paused () {
+  vm_status=`${_kubectl} get vm ${vm} -n ${namespace} -o=custom-columns='STATUS:status.printableStatus' | tail -n1`
+  if [ "${vm_status}" != "Paused" ]; then
+    echo "VM must be paused to perform this operation. VM ${vm} is in status ${vm_status}"
+    exit
+  fi
+}
+
 if [ "${action}" == "pause" ]; then
     ${_virtctl} pause vm ${vm}
     ${_exec} mkdir -p /opt/kubevirt
 elif [ "${action}" == "dump" ]; then
     ${_exec} mkdir -p ${TMP_DIR}
     _virsh="${_exec} virsh -c qemu+unix:///system?socket=/run/libvirt/libvirt-sock"
+    expect_vm_paused
     if [ "${dump_mode}" == "memory" ]; then
         dump_name="${namespace}_${vm}-${timestamp}.memory.dump"
         ${_virsh} dump ${namespace}_${vm} ${TMP_DIR}/${dump_name} --memory-only --verbose
