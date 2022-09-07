@@ -88,7 +88,7 @@ elif [ "${action}" == "dump" ]; then
         dump_name="${namespace}_${vm}-${timestamp}.memory.dump"
         ${_virsh} dump ${namespace}_${vm} ${TMP_DIR}/${dump_name} --memory-only --verbose
         log "Memory export is in progress..."
-        ${_kubectl} cp ${namespace}/${POD}:${TMP_DIR}/${dump_name} ${dump_name}
+        ${_exec} cat ${TMP_DIR}/${dump_name} > ${dump_name}
         ${_exec} rm -f ${TMP_DIR}/${dump_name}
     elif [ "${dump_mode}" == "disk" ]; then
         log "Disk export is in progress..."
