@@ -91,7 +91,24 @@ elif [ "${action}" == "dump" ]; then
             ${_virsh} dump ${namespace}_${vm} /opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.core.dump --verbose
         elif [ "${dump_mode}" == "disk" ]; then
             echo "Disk export is in progress..."
-            ${_exec} cat /dev/${vm} > ${namespace}_${vm}-${timestamp}.disk.dump
+            disk_paths=( $(${_exec} virsh domblklist ${namespace}_${vm} | tail -n+3 | cut -d"/" -f2-) )
+            disk_count=${#disk_paths[@]}
+            echo "Found ${disk_count} disks"
+
+            for (( i=0; i<${disk_count}; i++ ));
+            do
+                let human_idx=i+1
+                disk_path="/${disk_paths[$i]}"
+                disk_name="${disk_path%/}" # strip trailing slash (if any)
+                disk_name="${namespace}_${vm}-${human_idx}_${disk_name##*/}"
+                echo "Dumping disk #${human_idx}, named: ${disk_name}"
+
+                ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name}
+
+                echo "Disk ${disk_name} dumped sucessfully!"
+            done
+
+            echo "Dumped ${disk_count} disks sucessfully"
         fi
     fi
 elif [ "${action}" == "list" ]; then
