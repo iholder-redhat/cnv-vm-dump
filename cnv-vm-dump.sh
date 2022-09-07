@@ -100,7 +100,7 @@ elif [ "${action}" == "dump" ]; then
                 let human_idx=i+1
                 disk_path="/${disk_paths[$i]}"
                 disk_name="${disk_path%/}" # strip trailing slash (if any)
-                disk_name="${namespace}_${vm}-${human_idx}_${disk_name##*/}"
+                disk_name="${namespace}_${vm}-${timestamp}-${human_idx}_${disk_name##*/}"
                 echo "Dumping disk #${human_idx}, named: ${disk_name}"
 
                 ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name}
