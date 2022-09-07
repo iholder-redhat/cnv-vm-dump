@@ -69,17 +69,20 @@ POD=$(${_kubectl} get pods -n ${namespace} -l kubevirt.io/created-by=${UUID} --n
 _exec="${_kubectl} exec  ${POD} -n ${namespace} -c compute --"
 _virtctl="${VIRTCTL_BINARY:-virtctl}"
 _virtctl="${_virtctl} --namespace ${namespace}"
+TMP_DIR="/opt/kubevirt/external/${namespace}_${vm}/"
 
 if [ "${action}" == "pause" ]; then
     ${_virtctl} pause vm ${vm}
     ${_exec} mkdir -p /opt/kubevirt
 elif [ "${action}" == "dump" ]; then
-    ${_exec} mkdir -p /opt/kubevirt/external/${namespace}_${vm}/
+    ${_exec} mkdir -p ${TMP_DIR}
     _virsh="${_exec} virsh -c qemu+unix:///system?socket=/run/libvirt/libvirt-sock"
     if [ "${dump_mode}" == "memory" ]; then
-        ${_virsh} dump ${namespace}_${vm} /opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.memory.dump --memory-only --verbose
+        dump_name="${namespace}_${vm}-${timestamp}.memory.dump"
+        ${_virsh} dump ${namespace}_${vm} ${TMP_DIR}/${dump_name} --memory-only --verbose
         echo "Memory export is in progress..."
-        ${_kubectl} cp ${namespace}/${POD}:/opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.memory.dump ${namespace}_${vm}-${timestamp}.memory.dump
+        ${_kubectl} cp ${namespace}/${POD}:${TMP_DIR}/${dump_name} ${dump_name}
+        ${_exec} rm -f ${TMP_DIR}/${dump_name}
     elif [ "${dump_mode}" == "disk" ]; then
         echo "Disk export is in progress..."
         disk_paths=( $(${_exec} virsh domblklist ${namespace}_${vm} | tail -n+3 | cut -d"/" -f2-) )
@@ -101,10 +104,6 @@ elif [ "${action}" == "dump" ]; then
 
         echo "Dumped ${disk_count} disks sucessfully"
     fi
-elif [ "${action}" == "list" ]; then
-    ${_exec} ls -lah /opt/kubevirt/external/${namespace}_${vm}/
-elif [ "${action}" == "copy" ]; then
-    ${_exec} cat /opt/kubevirt/external/${namespace}_${vm}/${filename} > ${filename}
 elif [ "${action}" == "unpause" ]; then
     ${_exec} bash -c "rm -rf /opt/kubevirt/*"
     ${_virtctl} unpause vm ${vm}
