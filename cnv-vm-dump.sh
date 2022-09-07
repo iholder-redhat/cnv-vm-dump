@@ -11,7 +11,7 @@ _kubectl="${KUBECTL_BINARY:-oc}"
 timeout=10
 timestamp=$(date +%Y%m%d-%H%M%S)
 
-options=$(getopt -o n:,h --long help,pause,dump:,list,copy:,unpause -- "$@")
+options=$(getopt -o n:,h --long help,pause,dump:,unpause -- "$@")
 [ $? -eq 0 ] || {
     echo "Incorrect options provided"
     exit 1
@@ -27,14 +27,6 @@ while true; do
         action="dump"
         shift;
         dump_mode=$1
-        ;;
-    --copy)
-        action="copy"
-        shift;
-        filename=$1
-        ;;
-    --list)
-        action="list"
         ;;
     --unpause)
         action="unpause"
@@ -59,7 +51,7 @@ done
 shift $(expr $OPTIND - 1 )
 
 if [ "${action}" == "help" ]; then
-    echo "Usage: script <vm> [-n <namespace>]  --pause|--dump [memory|disk]|--list|--copy [filename]|--unpause"
+    echo "Usage: script <vm> [-n <namespace>]  --pause|--dump [memory|disk]|--unpause"
     exit 1
 fi
 
