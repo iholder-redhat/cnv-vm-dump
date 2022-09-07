@@ -52,6 +52,7 @@ shift $(expr $OPTIND - 1 )
 
 if [ "${action}" == "help" ]; then
     echo "Usage: script <vm> [-n <namespace>]  --pause|--dump [memory|disk]|--unpause"
+    echo "Environment variables: VIRTCTL_BINARY, KUBECTL_BINARY."
     exit 1
 fi
 
