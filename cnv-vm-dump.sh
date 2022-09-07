@@ -65,7 +65,7 @@ done
 shift $(expr $OPTIND - 1 )
 
 if [ "${action}" == "help" ]; then
-    echo "Usage: script <vm> [-n <namespace>]  --pause|--dump [core|memory|disk]|--capture_mode [dump|snapshot]|--list|--copy [filename]|--unpause"
+    echo "Usage: script <vm> [-n <namespace>]  --pause|--dump [memory|disk]|--capture_mode [dump|snapshot]|--list|--copy [filename]|--unpause"
     exit 1
 fi
 
@@ -87,8 +87,6 @@ elif [ "${action}" == "dump" ]; then
             ${_virsh} dump ${namespace}_${vm} /opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.memory.dump --memory-only --verbose
             echo "Memory export is in progress..."
             ${_kubectl} cp ${namespace}/${POD}:/opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.memory.dump ${namespace}_${vm}-${timestamp}.memory.dump
-        elif [ "${dump_mode}" == "core" ]; then
-            ${_virsh} dump ${namespace}_${vm} /opt/kubevirt/external/${namespace}_${vm}/${namespace}_${vm}-${timestamp}.core.dump --verbose
         elif [ "${dump_mode}" == "disk" ]; then
             echo "Disk export is in progress..."
             disk_paths=( $(${_exec} virsh domblklist ${namespace}_${vm} | tail -n+3 | cut -d"/" -f2-) )
