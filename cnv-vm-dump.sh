@@ -90,6 +90,7 @@ elif [ "${action}" == "dump" ]; then
         log "Memory export is in progress..."
         ${_exec} cat ${TMP_DIR}/${dump_name} > ${dump_name}
         ${_exec} rm -f ${TMP_DIR}/${dump_name}
+        log "Sucessfully dumped memory to ${dump_name}"
     elif [ "${dump_mode}" == "disk" ]; then
         log "Disk export is in progress..."
         disk_paths=( $(${_exec} virsh domblklist ${namespace}_${vm} | tail -n+3 | cut -d"/" -f2-) )
