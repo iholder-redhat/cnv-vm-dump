@@ -105,7 +105,7 @@ elif [ "${action}" == "dump" ]; then
             disk_name="${namespace}_${vm}-${timestamp}-${human_idx}_${disk_name##*/}"
             log "Dumping disk #${human_idx}, named: ${disk_name}"
 
-            ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name}
+            ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name} --retries=-1
 
             log "Disk ${disk_name} dumped sucessfully!"
         done
