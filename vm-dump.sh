@@ -5,6 +5,9 @@ RED='\e[31m'
 GREEN='\e[32m'
 RESET='\e[0m'
 
+DISK_TYPE_FILE="image file"
+DISK_TYPE_BLOCK_DEVICE="block device"
+
 namespace=default
 action=""
 _kubectl="${KUBECTL_BINARY:-oc}"
@@ -103,9 +106,20 @@ elif [ "${action}" == "dump" ]; then
             disk_path="/${disk_paths[$i]}"
             disk_name="${disk_path%/}" # strip trailing slash (if any)
             disk_name="${namespace}_${vm}-${timestamp}-${human_idx}_${disk_name##*/}"
-            log "Dumping disk #${human_idx}, named: ${disk_name}"
+            disk_type=`${_exec} bash -c "if [ -b ${disk_path} ]; then echo ${DISK_TYPE_BLOCK_DEVICE}; else echo ${DISK_TYPE_FILE}; fi"`
+            log "Dumping disk #${human_idx}, named: ${disk_name}. type: ${disk_type}"
 
-            ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name} --retries=-1
+            # Dump block device to a file
+            if [ "${disk_type}" == "${DISK_TYPE_BLOCK_DEVICE}" ]; then
+                log "Starting to dump block device into a file image"
+                disk_name="${disk_name}.img"
+                ${_exec} bash -c 'dd if=${disk_path} status=progress' > ${disk_name}
+            fi
+
+            if [ "${disk_type}" == "${DISK_TYPE_FILE}" ]; then
+                log "Starting to dump block device into a file image"
+                ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name} --retries=-1
+            fi
 
             log "Disk ${disk_name} dumped sucessfully!"
         done
