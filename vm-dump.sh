@@ -113,7 +113,7 @@ elif [ "${action}" == "dump" ]; then
             if [ "${disk_type}" == "${DISK_TYPE_BLOCK_DEVICE}" ]; then
                 log "Starting to dump block device into a file image"
                 disk_name="${disk_name}.img"
-                ${_exec} bash -c 'dd if=${disk_path} status=progress' > ${disk_name}
+                ${_exec} bash -c 'dd if=${disk_path} bs=32k status=progress' > ${disk_name}
             fi
 
             if [ "${disk_type}" == "${DISK_TYPE_FILE}" ]; then
