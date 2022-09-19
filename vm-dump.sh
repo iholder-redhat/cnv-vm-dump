@@ -120,7 +120,7 @@ elif [ "${action}" == "dump" ]; then
 
             if [ "${disk_type}" == "${DISK_TYPE_FILE}" ]; then
                 log "Starting to copy the disk image file"
-                ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name} --retries=-1
+                ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name} --retries=-1 -c "compute"
             fi
 
             log "Disk ${disk_name} dumped sucessfully!"
