@@ -117,7 +117,7 @@ elif [ "${action}" == "dump" ]; then
             fi
 
             if [ "${disk_type}" == "${DISK_TYPE_FILE}" ]; then
-                log "Starting to dump block device into a file image"
+                log "Starting to copy the disk image file"
                 ${_kubectl} cp ${namespace}/${POD}:${disk_path} ./${disk_name} --retries=-1
             fi
 
