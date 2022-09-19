@@ -108,12 +108,14 @@ elif [ "${action}" == "dump" ]; then
             disk_name="${namespace}_${vm}-${timestamp}-${human_idx}_${disk_name##*/}"
             disk_type=`${_exec} bash -c "if [ -b ${disk_path} ]; then echo ${DISK_TYPE_BLOCK_DEVICE}; else echo ${DISK_TYPE_FILE}; fi"`
             log "Dumping disk #${human_idx}, named: ${disk_name}. type: ${disk_type}"
+            log "DISK PATH: ${disk_path}"
 
             # Dump block device to a file
             if [ "${disk_type}" == "${DISK_TYPE_BLOCK_DEVICE}" ]; then
                 log "Starting to dump block device into a file image"
                 disk_name="${disk_name}.img"
-                ${_exec} bash -c 'dd if=${disk_path} bs=32k status=progress' > ${disk_name}
+                dd_cmd="dd if=${disk_path} bs=32k status=progress"
+                ${_exec} bash -c "${dd_cmd}" > ${disk_name}
             fi
 
             if [ "${disk_type}" == "${DISK_TYPE_FILE}" ]; then
